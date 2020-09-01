@@ -102,7 +102,7 @@ function toColorIndex(str) {
     if (str.trim().toLowerCase() == "rainbow") {
         return 32;
     }
-    if (isNumber(parseInt(n))) {
+    if (isNumber(parseInt(str))) {
         if (parseInt(str) < 32 && parseInt(str) >= 0)
             return randomColor();
         return parseInt(str);
