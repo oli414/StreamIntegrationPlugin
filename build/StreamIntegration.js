@@ -2702,7 +2702,57 @@ var Oui = /*#__PURE__*/Object.freeze({
 
 // Expose the OpenRCT2 to Visual Studio Code's Intellisense
 
-var colorsLookUp = ["black", "grey", "white", "dark purple", "light purple", "bright purple", "dark blue", "light blue", "icy blue", "dark water", "light water", "saturated green", "dark green", "moss green", "bright green", "olive green", "dark olive green", "bright yellow", "yellow", "dark yellow", "light orange", "dark orange", "light brown", "saturated brown", "dark brown", "salmon pink", "bordeaux red", "saturated red", "bright red", "dark pink", "bright pink", "light pink"];
+var colorsLookUp = ["black", "grey", "white", "dark purple", "light purple", "bright purple", "dark blue", "light blue", "icy blue", "dark water", "light water", "saturated green", "dark green", "moss green", "bright green", "olive green", "dark olive green", "bright yellow", "yellow", "dark yellow", "light orange", "dark orange", "light brown", "saturated brown", "dark brown", "salmon pink", "bordeaux red", "saturated red", "bright red", "dark pink", "bright pink", "light pink", "rainbow"];
+
+var colorDictionary = {
+    "darkpurple": 3,
+    "lightpurple": 4, "purple": 4,
+    "brightpurple": 5,
+    "darkblue": 6, "blue": 6,
+    "lightblue": 7,
+    "icyblue": 8, "icy": 8, "ice": 8,
+    "darkwater": 9, "water": 9, "ocean": 9,
+    "lightwater": 10,
+    "saturatedgreen": 11, "green": 11,
+    "darkgreen": 12,
+    "mossgreen": 13, "moss": 13,
+    "brightgreen": 14, "lightgreen": 14,
+    "olivegreen": 15, "olive": 15,
+    "darkolivegreen": 16,
+    "brightyellow": 17, "lightyellow": 17,
+    "yellow": 18,
+    "darkyellow": 19, "gold": 19,
+    "lightorange": 20, "orange": 20,
+    "darkorange": 21,
+    "lightbrown": 22,
+    "saturatedbrown": 23, "brown": 23,
+    "darkbrown": 24,
+    "salmonpink": 25, "salmon": 25,
+    "bordeauxred": 26,
+    "saturatedred": 27, "darkred": 27,
+    "brightred": 28, "red": 28,
+    "darkpink": 29, "magenta": 29,
+    "brightpink": 30, "pink": 30,
+    "lightpink": 31,
+    "black": 0, "dark": 0,
+    "grey": 1, "gray": 1,
+    "white": 2, "light": 2, "snow": 2
+};
+
+var cheatTypes = {
+    "GenerateGuests": 20,
+    "ExplodeGuests": 22,
+    "GiveAllGuests": 23,
+    "SpawnDucks": 47
+};
+
+function parseIntOrDefault(n, def) {
+    if (isNumber(parseInt(n))) {
+        return parseInt(n);
+    } else {
+        return def;
+    }
+}
 
 function isNumber(n) {
     return typeof n == 'number' && !isNaN(n) && isFinite(n);
@@ -2713,49 +2763,17 @@ function randomColor() {
 }
 
 function toColorIndex(str) {
-    if (isNumber(str)) {
+    if (str.trim().toLowerCase() == "rainbow") {
+        return 32;
+    }
+    if (isNumber(parseInt(n))) {
         if (parseInt(str) < 32 && parseInt(str) >= 0) return randomColor();
         return parseInt(str);
     } else {
-        var colorDictionary = {
-            "darkpurple": 3,
-            "lightpurple": 4, "purple": 4,
-            "brightpurple": 5,
-            "darkblue": 6, "blue": 6,
-            "lightblue": 7,
-            "icyblue": 8, "icy": 8, "ice": 8,
-            "darkwater": 9, "water": 9, "ocean": 9,
-            "lightwater": 10,
-            "saturatedgreen": 11, "green": 11,
-            "darkgreen": 12,
-            "mossgreen": 13, "moss": 13,
-            "brightgreen": 14, "lightgreen": 14,
-            "olivegreen": 15, "olive": 15,
-            "darkolivegreen": 16,
-            "brightyellow": 17, "lightyellow": 17,
-            "yellow": 18,
-            "darkyellow": 19,
-            "lightorange": 20, "orange": 20,
-            "darkorange": 21,
-            "lightbrown": 22,
-            "saturatedbrown": 23, "brown": 23,
-            "darkbrown": 24,
-            "salmonpink": 25, "salmon": 25,
-            "bordeauxred": 26,
-            "saturatedred": 27, "darkred": 27,
-            "brightred": 28, "red": 28,
-            "darkpink": 29, "magenta": 29,
-            "brightpink": 30, "pink": 30,
-            "lightpink": 31,
-            "black": 0, "dark": 0,
-            "grey": 1, "gray": 1,
-            "white": 2, "light": 2, "snow": 2
-        };
-
         str = str.toLowerCase();
-        str = str.replace(" ", "");
-        str = str.replace("-", "");
-        str = str.replace("_", "");
+        str = str.split(" ").join("");
+        str = str.split("-").join("");
+        str = str.split("_").join("");
 
         var color = colorDictionary[str];
         if (color == null) {
@@ -2979,6 +2997,8 @@ function main() {
             if (_parts[0] && _parts[1]) {
                 baseColor = toColorIndex(_parts[0]);
                 newColor = toColorIndex(_parts[1]);
+
+                console.log(baseColor);
             } else if (_parts[0]) {
                 baseColor = toColorIndex(_parts[0]);
             }
@@ -2991,6 +3011,169 @@ function main() {
             }
 
             recolorQueue.push([baseColor, newColor]);
+        } else if (data.type == "EXPLODE_PEEPS") {
+            context.executeAction("setcheataction", {
+                type: cheatTypes.ExplodeGuests,
+                param1: 0,
+                param2: 0
+            }, function (result) {});
+
+            if (enabledNotifications) {
+                park.postMessage({
+                    type: "guests",
+                    text: data.username + ": Might have made guests explosive"
+                });
+            }
+        } else if (data.type == "SPAWN_DUCKS") {
+            var value = parseIntOrDefault(data.message, 10);
+            context.executeAction("setcheataction", {
+                type: cheatTypes.SpawnDucks,
+                param1: value,
+                param2: 0
+            }, function (result) {});
+
+            if (enabledNotifications) {
+                park.postMessage({
+                    type: "blank",
+                    text: data.username + ": Started a duck migration of " + value + " ducks"
+                });
+            }
+        } else if (data.type == "GIVE_PEEPS_BALLOONS") {
+            context.executeAction("setcheataction", {
+                type: cheatTypes.GiveAllGuests,
+                param1: 2,
+                param2: 0
+            }, function (result) {});
+
+            if (enabledNotifications) {
+                park.postMessage({
+                    type: "guests",
+                    text: data.username + ": Gave guests balloons"
+                });
+            }
+        } else if (data.type == "GIVE_PEEPS_PARK_MAPS") {
+            context.executeAction("setcheataction", {
+                type: cheatTypes.GiveAllGuests,
+                param1: 1,
+                param2: 0
+            }, function (result) {});
+
+            if (enabledNotifications) {
+                park.postMessage({
+                    type: "guests",
+                    text: data.username + ": Gave guests park maps"
+                });
+            }
+        } else if (data.type == "GIVE_PEEPS_UMBRELLAS") {
+            context.executeAction("setcheataction", {
+                type: cheatTypes.GiveAllGuests,
+                param1: 3,
+                param2: 0
+            }, function (result) {});
+
+            if (enabledNotifications) {
+                park.postMessage({
+                    type: "guests",
+                    text: data.username + ": Gave guests umbrellas"
+                });
+            }
+        } else if (data.type == "SPAWN_PEEPS") {
+            var _value = parseIntOrDefault(data.message, 100);
+            context.executeAction("setcheataction", {
+                type: cheatTypes.GenerateGuests,
+                param1: parseIntOrDefault(data.message, 100),
+                param2: 0
+            }, function (result) {});
+
+            if (enabledNotifications) {
+                park.postMessage({
+                    type: "guests",
+                    text: data.username + ": Brought " + _value + " peeps"
+                });
+            }
+        } else if (data.type == "GIVE_PEEPS_MONEY") {
+            context.executeAction("setcheataction", {
+                type: cheatTypes.GiveAllGuests,
+                param1: 0,
+                param2: 0
+            }, function (result) {});
+
+            if (enabledNotifications) {
+                park.postMessage({
+                    type: "guests",
+                    text: data.username + ": Gave all guests $1000"
+                });
+            }
+        } else if (data.type == "REMOVE_ALL_PEEPS") {
+            context.executeAction("setcheataction", {
+                type: 21,
+                param1: 0,
+                param2: 0
+            }, function (result) {});
+
+            if (enabledNotifications) {
+                park.postMessage({
+                    type: "guests",
+                    text: data.username + ": Made all the guests disappear"
+                });
+            }
+        } else if (data.type == "NAUSEATE_PEEPS") {
+            context.executeAction("setcheataction", {
+                type: 19,
+                param1: 4,
+                param2: 255
+            }, function (result) {});
+
+            if (enabledNotifications) {
+                park.postMessage({
+                    type: "guests",
+                    text: data.username + ": Made all the guests sick"
+                });
+            }
+        } else if (data.type == "HEAL_PEEPS") {
+            context.executeAction("setcheataction", {
+                type: 19,
+                param1: 4,
+                param2: 0
+            }, function (result) {});
+
+            if (enabledNotifications) {
+                park.postMessage({
+                    type: "guests",
+                    text: data.username + ": Healed all the guests"
+                });
+            }
+        } else if (data.type == "ADD_MONEY" || data.type == "REMOVE_MONEY") {
+            var _value2 = parseIntOrDefault(data.message, 1000);
+            if (_value2 > 0 && data.type == "ADD_MONEY" || _value2 < 0 && data.type == "REMOVE_MONEY") {
+                if (_value2 < 0) _value2 = -_value2;
+                context.executeAction("setcheataction", {
+                    type: 16,
+                    param1: _value2 * 10,
+                    param2: 0
+                }, function (result) {});
+
+                if (enabledNotifications) {
+                    park.postMessage({
+                        type: "guests",
+                        text: data.username + ": Donated $" + _value2 + ".00 to your park"
+                    });
+                }
+            } else if (_value2 < 0 && data.type == "ADD_MONEY" || _value2 > 0 && data.type == "REMOVE_MONEY") {
+                if (_value2 > 0) _value2 = -_value2;
+                context.executeAction("setcheataction", {
+                    type: 16,
+                    param1: _value2 * 10,
+                    param2: 0
+                }, function (result) {});
+
+                if (enabledNotifications) {
+                    park.postMessage({
+                        type: "guests",
+                        text: data.username + ": Stole $" + -_value2 + ".00 from your park"
+                    });
+                }
+            }
         }
     });
 
@@ -3052,10 +3235,15 @@ function main() {
                 var recolorAction = recolorQueue[0];
 
                 function setColor(type, index) {
+                    var recolor = recolorAction[1];
+                    if (recolor == 32) {
+                        recolor = randomColor();
+                    }
+
                     var setColorParams = {
                         ride: ride.id,
                         type: type,
-                        value: recolorAction[1],
+                        value: recolor,
                         index: index
                     };
 
@@ -3064,27 +3252,16 @@ function main() {
 
                 for (var j = 0; j < ride.colourSchemes.length; j++) {
                     var colourScheme = ride.colourSchemes[j];
-                    if (colourScheme.main == recolorAction[0]) {
+                    var color = recolorAction[0];
+
+                    if (colourScheme.main == color || color == 32) {
                         setColor(0, j);
                     }
-                    if (colourScheme.additional == recolorAction[0]) {
+                    if (colourScheme.additional == color || color == 32) {
                         setColor(1, j);
                     }
-                    if (colourScheme.supports == recolorAction[0]) {
+                    if (colourScheme.supports == color || color == 32) {
                         setColor(2, j);
-                    }
-                }
-
-                for (var _j = 0; _j < ride.vehicleColours.length && _j < 1; _j++) {
-                    var vehicleColours = ride.vehicleColours[_j];
-                    if (vehicleColours.body == recolorAction[0]) {
-                        setColor(3, _j);
-                    }
-                    if (vehicleColours.trim == recolorAction[0]) {
-                        setColor(4, _j);
-                    }
-                    if (vehicleColours.ternary == recolorAction[0]) {
-                        setColor(5, _j);
                     }
                 }
 
