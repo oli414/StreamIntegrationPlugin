@@ -300,6 +300,43 @@ function main() {
                 }
             }
         }
+        else if (data.type == "SET_STAFF_NAME") {
+            for (let i = 0; i < map.numEntities; i++) {
+                let peep = map.getEntity(i);
+
+                if (peep == null)
+                    continue;
+
+                if (peep.type != "peep")
+                    continue;
+
+                if (peep.peepType != "staff")
+                    continue;
+
+                if (peep.name.startsWith("Handyman") ||
+                    peep.name.startsWith("Mechanic") ||
+                    peep.name.startsWith("Security Guard") ||
+                    peep.name.startsWith("Entertainer")) {
+
+
+                    context.executeAction("staffsetname", {
+                        spriteIndex: peep.id,
+                        name: data.message
+                    }, (result) => {
+
+                    });
+
+                    if (setViewerEntersNotification) {
+                        park.postMessage({
+                            type: "peep",
+                            text: data.username + ": Renamed " + peep.name + " to " + data.message,
+                            subject: peep.id
+                        });
+                    }
+                    break;
+                }
+            }
+        }
         else if (data.type == "SPAWN_PEEP") {
             let name = data.message;
             if (name == "") {
@@ -346,8 +383,6 @@ function main() {
             if (parts[0] && parts[1]) {
                 baseColor = toColorIndex(parts[0]);
                 newColor = toColorIndex(parts[1]);
-
-                console.log(baseColor);
             }
             else if (parts[0]) {
                 baseColor = toColorIndex(parts[0]);
@@ -527,6 +562,116 @@ function main() {
                 });
             }
         }
+        else if (data.type == "FILL_BLADDERS") {
+            context.executeAction("setcheataction", {
+                type: 19,
+                param1: 6,
+                param2: 255
+            }, (result) => {
+
+            });
+
+            if (enabledNotifications) {
+                park.postMessage({
+                    type: "guests",
+                    text: data.username + ": Filled everyone's bladder"
+                });
+            }
+        }
+        else if (data.type == "EMPTY_BLADDERS") {
+            context.executeAction("setcheataction", {
+                type: 19,
+                param1: 6,
+                param2: 0
+            }, (result) => {
+
+            });
+
+            if (enabledNotifications) {
+                park.postMessage({
+                    type: "guests",
+                    text: data.username + ": Emptied everyone's bladder"
+                });
+            }
+        }
+        else if (data.type == "MOW_GRASS") {
+            context.executeAction("setcheataction", {
+                type: 24,
+                param1: 0,
+                param2: 0
+            }, (result) => {
+
+            });
+
+            if (enabledNotifications) {
+                park.postMessage({
+                    type: "blank",
+                    text: data.username + ": Mowed the grass"
+                });
+            }
+        }
+        else if (data.type == "FIX_VANDALISM") {
+            context.executeAction("setcheataction", {
+                type: 27,
+                param1: 0,
+                param2: 0
+            }, (result) => {
+
+            });
+
+            if (enabledNotifications) {
+                park.postMessage({
+                    type: "blank",
+                    text: data.username + ": Fixed all the vandalism"
+                });
+            }
+        }
+        else if (data.type == "REMOVE_LITTER") {
+            context.executeAction("setcheataction", {
+                type: 28,
+                param1: 0,
+                param2: 0
+            }, (result) => {
+
+            });
+
+            if (enabledNotifications) {
+                park.postMessage({
+                    type: "blank",
+                    text: data.username + ": Removed all the litter"
+                });
+            }
+        }
+        else if (data.type == "FORCE_WEATHER") {
+            context.executeAction("setcheataction", {
+                type: 36,
+                param1: parseIntOrDefault(data.message, 0),
+                param2: 0
+            }, (result) => {
+
+            });
+
+            if (enabledNotifications) {
+                park.postMessage({
+                    type: "blank",
+                    text: data.username + ": Changed the weather"
+                });
+            }
+        }
+        else if (data.type == "SET_PARK_NAME") {
+            context.executeAction("parksetname", {
+                name: data.message
+            }, (result) => {
+
+            });
+
+            if (enabledNotifications) {
+                park.postMessage({
+                    type: "blank",
+                    text: data.username + ": Changed the park name to " + data.message
+                });
+            }
+        }
         else if (data.type == "ADD_MONEY" || data.type == "REMOVE_MONEY") {
             let value = parseIntOrDefault(data.message, 1000);
             if ((value > 0 && data.type == "ADD_MONEY") ||
@@ -667,6 +812,21 @@ function main() {
                     }
                     if (colourScheme.supports == color || color == 32) {
                         setColor(2, j);
+                    }
+                }
+
+                if (ride.vehicleColours.length > 0) {
+                    let vehicleColours = ride.vehicleColours[0];
+                    let color = recolorAction[0];
+
+                    if (vehicleColours.body == color || color == 32) {
+                        setColor(3, 0);
+                    }
+                    if (vehicleColours.trim == color || color == 32) {
+                        setColor(4, 0);
+                    }
+                    if (vehicleColours.ternary == color || color == 32) {
+                        setColor(5, 0);
                     }
                 }
 
