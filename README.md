@@ -3,7 +3,7 @@ This plugin allows you to enable Twitch integration with OpenRCT2.
 Plugins cannot communicate with Twitch directly, make sure to run the [OpenRCT2 Stream Integration Relay](https://github.com/oli414/OpenRCT2StreamIntegration) simultaneously.
 
 ## Prerequisites
-- This plugin requires OpenRCT2 Release v0.4.0 (or higher), or OpenRCT2 Develop v0.3.0 (or higher)
+- This plugin requires OpenRCT2 Release v0.4.0 (or higher, not yet available), or OpenRCT2 Develop v0.3.0 (or higher)
 
 ## Installation
 - Download the most recent plugin file [here](https://github.com/oli414/StreamIntegrationPlugin/releases) (`StreamIntegration.js
