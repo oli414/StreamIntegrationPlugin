@@ -3060,7 +3060,7 @@ function main() {
             if (enabledNotifications) {
                 park.postMessage({
                     type: "blank",
-                    text: data.username + ": Started a duck migration of " + value + " ducks"
+                    text: data.username + ": Started a duck migration"
                 });
             }
         } else if (data.type == "GIVE_PEEPS_BALLOONS") {
