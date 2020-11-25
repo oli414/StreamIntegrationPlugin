@@ -77,8 +77,8 @@ const colorDictionary = {
 const cheatTypes = {
     "GenerateGuests": 20,
     "ExplodeGuests": 22,
-    "GiveAllGuests": 23,
-    "SpawnDucks": 47
+    "GiveAllGuests": 22,
+    "SpawnDucks": 46
 };
 
 function parseIntOrDefault(n, def) {
@@ -333,6 +333,9 @@ function main() {
                             subject: peep.id
                         });
                     }
+
+                    peep.name = data.message;
+
                     break;
                 }
             }
@@ -401,13 +404,18 @@ function main() {
             ]);
         }
         else if (data.type == "EXPLODE_PEEPS") {
-            context.executeAction("setcheataction", {
-                type: cheatTypes.ExplodeGuests,
-                param1: 0,
-                param2: 0
-            }, (result) => {
+            for (var i = 0; i < map.numEntities; i++) {
+                var entity = map.getEntity(i);
+                if (!entity) {
+                    continue;
+                }
 
-            });
+                var entityIsGuest = entity.type === 'peep' && entity.peepType === "guest";
+
+                if (entityIsGuest && context.getRandom(0, 6) === 0) {
+                    entity.setFlag("explode", true);
+                }
+            }
 
             if (enabledNotifications) {
                 park.postMessage({
@@ -439,7 +447,7 @@ function main() {
                 param1: 2,
                 param2: 0
             }, (result) => {
-
+                console.log(result);
             });
 
             if (enabledNotifications) {
@@ -596,11 +604,12 @@ function main() {
         }
         else if (data.type == "MOW_GRASS") {
             context.executeAction("setcheataction", {
-                type: 24,
-                param1: 0,
-                param2: 0
+                type: 23,
+                param1: 3,
+                param2: 0,
+                flags: null
             }, (result) => {
-
+                console.log(result);
             });
 
             if (enabledNotifications) {
@@ -610,9 +619,25 @@ function main() {
                 });
             }
         }
+        else if (data.type == "FIX_RIDES") {
+            context.executeAction("setcheataction", {
+                type: 31,
+                param1: 0,
+                param2: 0
+            }, (result) => {
+                console.log(result);
+            });
+
+            if (enabledNotifications) {
+                park.postMessage({
+                    type: "blank",
+                    text: data.username + ": Fixed all the rides"
+                });
+            }
+        }
         else if (data.type == "FIX_VANDALISM") {
             context.executeAction("setcheataction", {
-                type: 27,
+                type: 26,
                 param1: 0,
                 param2: 0
             }, (result) => {
@@ -628,7 +653,7 @@ function main() {
         }
         else if (data.type == "REMOVE_LITTER") {
             context.executeAction("setcheataction", {
-                type: 28,
+                type: 27,
                 param1: 0,
                 param2: 0
             }, (result) => {
@@ -644,7 +669,7 @@ function main() {
         }
         else if (data.type == "FORCE_WEATHER") {
             context.executeAction("setcheataction", {
-                type: 36,
+                type: 35,
                 param1: parseIntOrDefault(data.message, 0),
                 param2: 0
             }, (result) => {

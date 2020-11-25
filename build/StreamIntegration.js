@@ -2742,8 +2742,8 @@ var colorDictionary = {
 var cheatTypes = {
     "GenerateGuests": 20,
     "ExplodeGuests": 22,
-    "GiveAllGuests": 23,
-    "SpawnDucks": 47
+    "GiveAllGuests": 22,
+    "SpawnDucks": 46
 };
 
 function parseIntOrDefault(n, def) {
@@ -2932,8 +2932,8 @@ function main() {
         if (data.type == "NAME_RIDE") {
             var parts = data.message.split(" to ");
 
-            for (var i = 0; i < map.numRides; i++) {
-                var ride = map.rides[i];
+            for (var _i3 = 0; _i3 < map.numRides; _i3++) {
+                var ride = map.rides[_i3];
 
                 if (ride.name.toLowerCase() == "<" + parts[0].toLowerCase() + ">" || parts[0].startsWith("<") && parts[0].endsWith(">") && ride.name.toLowerCase() == parts[0].toLowerCase()) {
 
@@ -2954,8 +2954,8 @@ function main() {
                 }
             }
         } else if (data.type == "SET_STAFF_NAME") {
-            for (var _i3 = 0; _i3 < map.numEntities; _i3++) {
-                var peep = map.getEntity(_i3);
+            for (var _i4 = 0; _i4 < map.numEntities; _i4++) {
+                var peep = map.getEntity(_i4);
 
                 if (peep == null) continue;
 
@@ -2977,6 +2977,9 @@ function main() {
                             subject: peep.id
                         });
                     }
+
+                    peep.name = data.message;
+
                     break;
                 }
             }
@@ -2989,8 +2992,8 @@ function main() {
             var currentPeep = null;
             var preExisting = false;
             var peeps = map.getAllEntities("peep");
-            for (var _i4 = 0; _i4 < peeps.length; _i4++) {
-                var _peep = peeps[_i4];
+            for (var _i5 = 0; _i5 < peeps.length; _i5++) {
+                var _peep = peeps[_i5];
 
                 if (_peep.name == name) {
                     currentPeep = _peep;
@@ -3037,11 +3040,18 @@ function main() {
 
             recolorQueue.push([baseColor, newColor]);
         } else if (data.type == "EXPLODE_PEEPS") {
-            context.executeAction("setcheataction", {
-                type: cheatTypes.ExplodeGuests,
-                param1: 0,
-                param2: 0
-            }, function (result) {});
+            for (var i = 0; i < map.numEntities; i++) {
+                var entity = map.getEntity(i);
+                if (!entity) {
+                    continue;
+                }
+
+                var entityIsGuest = entity.type === 'peep' && entity.peepType === "guest";
+
+                if (entityIsGuest && context.getRandom(0, 6) === 0) {
+                    entity.setFlag("explode", true);
+                }
+            }
 
             if (enabledNotifications) {
                 park.postMessage({
@@ -3068,7 +3078,9 @@ function main() {
                 type: cheatTypes.GiveAllGuests,
                 param1: 2,
                 param2: 0
-            }, function (result) {});
+            }, function (result) {
+                console.log(result);
+            });
 
             if (enabledNotifications) {
                 park.postMessage({
@@ -3196,10 +3208,13 @@ function main() {
             }
         } else if (data.type == "MOW_GRASS") {
             context.executeAction("setcheataction", {
-                type: 24,
-                param1: 0,
-                param2: 0
-            }, function (result) {});
+                type: 23,
+                param1: 3,
+                param2: 0,
+                flags: null
+            }, function (result) {
+                console.log(result);
+            });
 
             if (enabledNotifications) {
                 park.postMessage({
@@ -3207,9 +3222,24 @@ function main() {
                     text: data.username + ": Mowed the grass"
                 });
             }
+        } else if (data.type == "FIX_RIDES") {
+            context.executeAction("setcheataction", {
+                type: 31,
+                param1: 0,
+                param2: 0
+            }, function (result) {
+                console.log(result);
+            });
+
+            if (enabledNotifications) {
+                park.postMessage({
+                    type: "blank",
+                    text: data.username + ": Fixed all the rides"
+                });
+            }
         } else if (data.type == "FIX_VANDALISM") {
             context.executeAction("setcheataction", {
-                type: 27,
+                type: 26,
                 param1: 0,
                 param2: 0
             }, function (result) {});
@@ -3222,7 +3252,7 @@ function main() {
             }
         } else if (data.type == "REMOVE_LITTER") {
             context.executeAction("setcheataction", {
-                type: 28,
+                type: 27,
                 param1: 0,
                 param2: 0
             }, function (result) {});
@@ -3235,7 +3265,7 @@ function main() {
             }
         } else if (data.type == "FORCE_WEATHER") {
             context.executeAction("setcheataction", {
-                type: 36,
+                type: 35,
                 param1: parseIntOrDefault(data.message, 0),
                 param2: 0
             }, function (result) {});
@@ -3344,7 +3374,7 @@ function main() {
         if (recolorQueue.length > 0) {
             var checksPerTick = 2;
 
-            var _loop = function _loop(_i5) {
+            var _loop = function _loop(_i6) {
                 var ride = map.rides[rideIndex];
                 var recolorAction = recolorQueue[0];
 
@@ -3397,8 +3427,8 @@ function main() {
                 rideIndex++;
             };
 
-            for (var _i5 = 0; _i5 < checksPerTick && _i5 + rideIndex < map.numRides; _i5++) {
-                _loop(_i5);
+            for (var _i6 = 0; _i6 < checksPerTick && _i6 + rideIndex < map.numRides; _i6++) {
+                _loop(_i6);
             }
             if (rideIndex >= map.numRides) {
                 rideIndex = 0;
