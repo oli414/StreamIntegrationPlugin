@@ -12,9 +12,6 @@ Plugins cannot communicate with Twitch directly, make sure to run the [OpenRCT2 
 
 - Install the OpenRCT2 Stream Integration Relay ([installation steps here](https://github.com/oli414/OpenRCT2StreamIntegration))
 
-## Warning
-The OpenRCT2 Stream Integration plugin is known to have a performance impact on your game. Use the checkbox in the in-game Stream Integration widget to disable the plugin when not in use.
-
 ## Running the OpenRCT2 Stream Integration for Twitch
 - Run `start.bat` from the Relay's installation folder (On Windows), or: Navigate a command prompt to the project folder and run `npm run start`
 - Your default browser may open asking you to log into Twitch, and give permission for the OpenRCT2 Stream Integration to keep track of channel activities
