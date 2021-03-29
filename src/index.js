@@ -272,6 +272,11 @@ function main() {
 
     socket.on("data", (msg) => {
         const data = JSON.parse(msg);
+
+        if (true) {
+            console.log(data);
+        }
+
         if (data.type == "NAME_RIDE") {
             const parts = data.message.split(" to ");
 
@@ -635,6 +640,45 @@ function main() {
                 });
             }
         }
+        else if (data.type == "FIX_RIDE") {
+
+            const ridename = data.message;
+
+            for (let i = 0; i < map.numRides; i++) {
+                let ride = map.rides[i];
+
+                if ((ride.name.toLowerCase() == ridename.toLowerCase())) {
+                    if (enabledNotifications) {
+                        park.postMessage({
+                            type: "blank",
+                            text: data.username + ": Fixed " + ride.name
+                        });
+                    }
+
+                    ride
+
+                    /*
+                    context.executeAction("ridesetname", {
+                        ride: ride.id,
+                        name: parts[1]
+                    }, (result) => {
+
+                    });*/
+
+
+                    break;
+                }
+            }
+
+            const ride = 0;
+
+            if (enabledNotifications) {
+                park.postMessage({
+                    type: "blank",
+                    text: data.username + ": Fixed " + ride.name
+                });
+            }
+        }
         else if (data.type == "FIX_VANDALISM") {
             context.executeAction("setcheataction", {
                 type: 26,
@@ -744,62 +788,46 @@ function main() {
     connect();
 
     let rideIndex = 0;
-    let lastPeepCount = 0;
-    context.subscribe("interval.tick", () => {
-        // Rename newly spawned peeps
-        let allPeeps = map.getAllEntities("peep");
-        currentPeepCount = allPeeps.length;
-        if (peepSpawnQueue.length > 0) {
-            if (currentPeepCount > lastPeepCount && lastPeepCount != 0) {
-                for (let i = 0; i < map.numEntities; i++) {
-                    let peep = map.getEntity(i);
 
-                    if (peep == null)
-                        continue;
+    context.subscribe("guest.generation", (e) => {
+        if (e.id && peepSpawnQueue.length > 0) {
+            let peep = map.getEntity(e.id);
 
-                    if (peep.type != "peep")
-                        continue;
+            if (peep == null)
+                return;
 
-                    if (peep.peepType != "guest")
-                        continue;
+            if (peep.type != "peep")
+                return;
 
-                    if (activeViewerPeeps.indexOf(peep.name) >= 0)
-                        continue;
+            if (peep.peepType != "guest")
+                return;
 
-                    if (peep.getFlag("leavingPark"))
-                        continue;
+            if (activeViewerPeeps.indexOf(peep.name) >= 0)
+                return;
 
-                    if (peep.x < 0 || peep.x >= map.size.x * 32 && peep.y == 0 && peep.z == 0)
-                        continue;
+            // New peep has spawned
+            peep.setFlag("tracking", setPeepsFollow);
 
-                    if (!(Math.floor(peep.x / 32) <= 1 || Math.floor(peep.y / 32) <= 1 ||
-                        Math.floor(peep.x / 32) >= map.size.x - 2 || Math.floor(peep.y / 32) >= map.size.y - 2))
-                        continue;
+            context.executeAction("guestsetname", {
+                peep: peep.id,
+                name: peepSpawnQueue[0]
+            }, (result) => {
 
-                    // New peep has spawned
-                    peep.setFlag("tracking", setPeepsFollow);
-                    context.executeAction("guestsetname", {
-                        peep: peep.id,
-                        name: peepSpawnQueue[0]
-                    }, (result) => {
+            });
 
-                    });
-
-                    if (setViewerEntersNotification) {
-                        park.postMessage({
-                            type: "peep",
-                            text: peepSpawnQueue[0] + " entered the park!",
-                            subject: peep.id
-                        });
-                    }
-
-                    activeViewerPeeps.push(peepSpawnQueue[0]);
-                    peepSpawnQueue.shift();
-                }
+            if (setViewerEntersNotification) {
+                park.postMessage({
+                    type: "peep",
+                    text: peepSpawnQueue[0] + " entered the park!",
+                    subject: peep.id
+                });
             }
+            activeViewerPeeps.push(peepSpawnQueue[0]);
+            peepSpawnQueue.shift();
         }
-        lastPeepCount = currentPeepCount;
+    });
 
+    context.subscribe("interval.tick", () => {
         // Recolor rides
         if (recolorQueue.length > 0) {
             let checksPerTick = 2;

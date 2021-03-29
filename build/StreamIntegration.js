@@ -2788,8 +2788,6 @@ function toColorIndex(str) {
         return color;
     }
 }
-
-var currentPeepCount = 0;
 var setPeepsFollow = context.sharedStorage.get("Oli414.StreamIntegration.TrackPeeps", true);
 var setViewerEntersNotification = context.sharedStorage.get("Oli414.StreamIntegration.EnablePeepSpawnNotification", true);
 var enabledNotifications = context.sharedStorage.get("Oli414.StreamIntegration.EnableNotifications", true);
@@ -2929,6 +2927,11 @@ function main() {
 
     socket.on("data", function (msg) {
         var data = JSON.parse(msg);
+
+        {
+            console.log(data);
+        }
+
         if (data.type == "NAME_RIDE") {
             var parts = data.message.split(" to ");
 
@@ -3237,6 +3240,40 @@ function main() {
                     text: data.username + ": Fixed all the rides"
                 });
             }
+        } else if (data.type == "FIX_RIDE") {
+
+            var ridename = data.message;
+
+            for (var _i6 = 0; _i6 < map.numRides; _i6++) {
+                var _ride2 = map.rides[_i6];
+
+                if (_ride2.name.toLowerCase() == ridename.toLowerCase()) {
+                    if (enabledNotifications) {
+                        park.postMessage({
+                            type: "blank",
+                            text: data.username + ": Fixed " + _ride2.name
+                        });
+                    }
+
+                    /*
+                    context.executeAction("ridesetname", {
+                        ride: ride.id,
+                        name: parts[1]
+                    }, (result) => {
+                     });*/
+
+                    break;
+                }
+            }
+
+            var _ride = 0;
+
+            if (enabledNotifications) {
+                park.postMessage({
+                    type: "blank",
+                    text: data.username + ": Fixed " + _ride.name
+                });
+            }
         } else if (data.type == "FIX_VANDALISM") {
             context.executeAction("setcheataction", {
                 type: 26,
@@ -3324,57 +3361,45 @@ function main() {
     connect();
 
     var rideIndex = 0;
-    var lastPeepCount = 0;
-    context.subscribe("interval.tick", function () {
-        // Rename newly spawned peeps
-        var allPeeps = map.getAllEntities("peep");
-        currentPeepCount = allPeeps.length;
-        if (peepSpawnQueue.length > 0) {
-            if (currentPeepCount > lastPeepCount && lastPeepCount != 0) {
-                for (var i = 0; i < map.numEntities; i++) {
-                    var peep = map.getEntity(i);
 
-                    if (peep == null) continue;
+    context.subscribe("guest.generation", function (e) {
+        if (e.id && peepSpawnQueue.length > 0) {
+            var peep = map.getEntity(e.id);
 
-                    if (peep.type != "peep") continue;
+            if (peep == null) return;
 
-                    if (peep.peepType != "guest") continue;
+            if (peep.type != "peep") return;
 
-                    if (activeViewerPeeps.indexOf(peep.name) >= 0) continue;
+            if (peep.peepType != "guest") return;
 
-                    if (peep.getFlag("leavingPark")) continue;
+            if (activeViewerPeeps.indexOf(peep.name) >= 0) return;
 
-                    if (peep.x < 0 || peep.x >= map.size.x * 32 && peep.y == 0 && peep.z == 0) continue;
+            // New peep has spawned
+            peep.setFlag("tracking", setPeepsFollow);
 
-                    if (!(Math.floor(peep.x / 32) <= 1 || Math.floor(peep.y / 32) <= 1 || Math.floor(peep.x / 32) >= map.size.x - 2 || Math.floor(peep.y / 32) >= map.size.y - 2)) continue;
+            context.executeAction("guestsetname", {
+                peep: peep.id,
+                name: peepSpawnQueue[0]
+            }, function (result) {});
 
-                    // New peep has spawned
-                    peep.setFlag("tracking", setPeepsFollow);
-                    context.executeAction("guestsetname", {
-                        peep: peep.id,
-                        name: peepSpawnQueue[0]
-                    }, function (result) {});
-
-                    if (setViewerEntersNotification) {
-                        park.postMessage({
-                            type: "peep",
-                            text: peepSpawnQueue[0] + " entered the park!",
-                            subject: peep.id
-                        });
-                    }
-
-                    activeViewerPeeps.push(peepSpawnQueue[0]);
-                    peepSpawnQueue.shift();
-                }
+            if (setViewerEntersNotification) {
+                park.postMessage({
+                    type: "peep",
+                    text: peepSpawnQueue[0] + " entered the park!",
+                    subject: peep.id
+                });
             }
+            activeViewerPeeps.push(peepSpawnQueue[0]);
+            peepSpawnQueue.shift();
         }
-        lastPeepCount = currentPeepCount;
+    });
 
+    context.subscribe("interval.tick", function () {
         // Recolor rides
         if (recolorQueue.length > 0) {
             var checksPerTick = 2;
 
-            var _loop = function _loop(_i6) {
+            var _loop = function _loop(i) {
                 var ride = map.rides[rideIndex];
                 var recolorAction = recolorQueue[0];
 
@@ -3427,8 +3452,8 @@ function main() {
                 rideIndex++;
             };
 
-            for (var _i6 = 0; _i6 < checksPerTick && _i6 + rideIndex < map.numRides; _i6++) {
-                _loop(_i6);
+            for (var i = 0; i < checksPerTick && i + rideIndex < map.numRides; i++) {
+                _loop(i);
             }
             if (rideIndex >= map.numRides) {
                 rideIndex = 0;
