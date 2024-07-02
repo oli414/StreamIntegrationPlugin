@@ -3064,7 +3064,7 @@ function main() {
             }
         } else if (data.type == "SPAWN_DUCKS") {
             var value = parseIntOrDefault(data.message, 10);
-            context.executeAction("setcheataction", {
+            context.executeAction("cheatset", {
                 type: cheatTypes.SpawnDucks,
                 param1: value,
                 param2: 0
@@ -3077,7 +3077,7 @@ function main() {
                 });
             }
         } else if (data.type == "GIVE_PEEPS_BALLOONS") {
-            context.executeAction("setcheataction", {
+            context.executeAction("cheatset", {
                 type: cheatTypes.GiveAllGuests,
                 param1: 2,
                 param2: 0
@@ -3092,7 +3092,7 @@ function main() {
                 });
             }
         } else if (data.type == "GIVE_PEEPS_PARK_MAPS") {
-            context.executeAction("setcheataction", {
+            context.executeAction("cheatset", {
                 type: cheatTypes.GiveAllGuests,
                 param1: 1,
                 param2: 0
@@ -3105,7 +3105,7 @@ function main() {
                 });
             }
         } else if (data.type == "GIVE_PEEPS_UMBRELLAS") {
-            context.executeAction("setcheataction", {
+            context.executeAction("cheatset", {
                 type: cheatTypes.GiveAllGuests,
                 param1: 3,
                 param2: 0
@@ -3119,7 +3119,7 @@ function main() {
             }
         } else if (data.type == "SPAWN_PEEPS") {
             var _value = parseIntOrDefault(data.message, 100);
-            context.executeAction("setcheataction", {
+            context.executeAction("cheatset", {
                 type: cheatTypes.GenerateGuests,
                 param1: parseIntOrDefault(data.message, 100),
                 param2: 0
@@ -3132,7 +3132,7 @@ function main() {
                 });
             }
         } else if (data.type == "GIVE_PEEPS_MONEY") {
-            context.executeAction("setcheataction", {
+            context.executeAction("cheatset", {
                 type: cheatTypes.GiveAllGuests,
                 param1: 0,
                 param2: 0
@@ -3145,7 +3145,7 @@ function main() {
                 });
             }
         } else if (data.type == "REMOVE_ALL_PEEPS") {
-            context.executeAction("setcheataction", {
+            context.executeAction("cheatset", {
                 type: 21,
                 param1: 0,
                 param2: 0
@@ -3158,7 +3158,7 @@ function main() {
                 });
             }
         } else if (data.type == "NAUSEATE_PEEPS") {
-            context.executeAction("setcheataction", {
+            context.executeAction("cheatset", {
                 type: 19,
                 param1: 4,
                 param2: 255
@@ -3171,7 +3171,7 @@ function main() {
                 });
             }
         } else if (data.type == "HEAL_PEEPS") {
-            context.executeAction("setcheataction", {
+            context.executeAction("cheatset", {
                 type: 19,
                 param1: 4,
                 param2: 0
@@ -3184,7 +3184,7 @@ function main() {
                 });
             }
         } else if (data.type == "FILL_BLADDERS") {
-            context.executeAction("setcheataction", {
+            context.executeAction("cheatset", {
                 type: 19,
                 param1: 6,
                 param2: 255
@@ -3197,7 +3197,7 @@ function main() {
                 });
             }
         } else if (data.type == "EMPTY_BLADDERS") {
-            context.executeAction("setcheataction", {
+            context.executeAction("cheatset", {
                 type: 19,
                 param1: 6,
                 param2: 0
@@ -3210,7 +3210,7 @@ function main() {
                 });
             }
         } else if (data.type == "MOW_GRASS") {
-            context.executeAction("setcheataction", {
+            context.executeAction("cheatset", {
                 type: 23,
                 param1: 3,
                 param2: 0,
@@ -3226,7 +3226,7 @@ function main() {
                 });
             }
         } else if (data.type == "FIX_RIDES") {
-            context.executeAction("setcheataction", {
+            context.executeAction("cheatset", {
                 type: 31,
                 param1: 0,
                 param2: 0
@@ -3260,7 +3260,7 @@ function main() {
                         ride: ride.id,
                         name: parts[1]
                     }, (result) => {
-                     });*/
+                      });*/
 
                     break;
                 }
@@ -3275,7 +3275,7 @@ function main() {
                 });
             }
         } else if (data.type == "FIX_VANDALISM") {
-            context.executeAction("setcheataction", {
+            context.executeAction("cheatset", {
                 type: 26,
                 param1: 0,
                 param2: 0
@@ -3288,7 +3288,7 @@ function main() {
                 });
             }
         } else if (data.type == "REMOVE_LITTER") {
-            context.executeAction("setcheataction", {
+            context.executeAction("cheatset", {
                 type: 27,
                 param1: 0,
                 param2: 0
@@ -3301,7 +3301,7 @@ function main() {
                 });
             }
         } else if (data.type == "FORCE_WEATHER") {
-            context.executeAction("setcheataction", {
+            context.executeAction("cheatset", {
                 type: 35,
                 param1: parseIntOrDefault(data.message, 0),
                 param2: 0
@@ -3328,7 +3328,7 @@ function main() {
             var _value2 = parseIntOrDefault(data.message, 1000);
             if (_value2 > 0 && data.type == "ADD_MONEY" || _value2 < 0 && data.type == "REMOVE_MONEY") {
                 if (_value2 < 0) _value2 = -_value2;
-                context.executeAction("setcheataction", {
+                context.executeAction("cheatset", {
                     type: 16,
                     param1: _value2 * 10,
                     param2: 0
@@ -3342,7 +3342,7 @@ function main() {
                 }
             } else if (_value2 < 0 && data.type == "ADD_MONEY" || _value2 > 0 && data.type == "REMOVE_MONEY") {
                 if (_value2 > 0) _value2 = -_value2;
-                context.executeAction("setcheataction", {
+                context.executeAction("cheatset", {
                     type: 16,
                     param1: _value2 * 10,
                     param2: 0
