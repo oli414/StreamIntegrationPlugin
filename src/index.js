@@ -75,9 +75,18 @@ const colorDictionary = {
 };
 
 const cheatTypes = {
+    "AddMoney": 16,
+    "ClearLoan": 18,
     "GenerateGuests": 20,
     "ExplodeGuests": 22,
     "GiveAllGuests": 22,
+    "SetGrassLength": 23,
+    "WaterPlants": 24,
+    "FixVandalism": 26,
+    "RemoveLitter": 27,
+    "RenewRides": 29,
+    "FixRides": 31,
+    "ForceWeather": 35,
     "SpawnDucks": 46
 };
 
@@ -494,6 +503,58 @@ function main() {
                 });
             }
         }
+        else if (data.type == "REMOVE_ITEM_FROM_PEEPS") {
+            var item = "balloon";
+            if(data.message !== undefined && data.message !== "") {
+                item = data.message;
+            }
+            for (var i = 0; i < map.numEntities; i++) {
+                var entity = map.getEntity(i);
+                if (!entity) {
+                    continue;
+                }
+
+                var entityIsGuest = entity.type === 'peep' && entity.peepType === "guest";
+
+                if (entityIsGuest) {
+                    for(var j = 0; j < entity.items.length; j++) {
+                        if(entity.items[j].type === item) {
+                            entity.removeItem(entity.items[j]);
+                        }
+                    }
+                }
+            }
+
+            if (enabledNotifications) {
+                park.postMessage({
+                    type: "guests",
+                    text: data.username + ": Made guests lose their " + item + "s"
+                });
+            }
+        }
+        else if (data.type == "REMOVE_ALL_ITEMS_FROM_PEEPS") {
+            for (var i = 0; i < map.numEntities; i++) {
+                var entity = map.getEntity(i);
+                if (!entity) {
+                    continue;
+                }
+
+                var entityIsGuest = entity.type === 'peep' && entity.peepType === "guest";
+
+                if (entityIsGuest) {
+                    for(; 0 < entity.items.length;) {//Loop through all the items, but the array gets smaller every time we remove an item.
+                        entity.removeItem(entity.items[0]);//Let's always remove the first item in the list. Let's clear them out!
+                    }
+                }
+            }
+
+            if (enabledNotifications) {
+                park.postMessage({
+                    type: "guests",
+                    text: data.username + ": Made guests lose all their items"
+                });
+            }
+        }
         else if (data.type == "SPAWN_PEEPS") {
             let value = parseIntOrDefault(data.message, 100);
             context.executeAction("cheatset", {
@@ -609,7 +670,7 @@ function main() {
         }
         else if (data.type == "MOW_GRASS") {
             context.executeAction("cheatset", {
-                type: 23,
+                type: cheatTypes.SetGrassLength,
                 param1: 3,
                 param2: 0,
                 flags: null
@@ -624,9 +685,25 @@ function main() {
                 });
             }
         }
+        else if (data.type == "RENEW_RIDES") {
+            context.executeAction("cheatset", {
+                type: cheatTypes.RenewRides,
+                param1: 0,
+                param2: 0
+            }, (result) => {
+                console.log(result);
+            });
+
+            if (enabledNotifications) {
+                park.postMessage({
+                    type: "blank",
+                    text: data.username + ": Refurbished all the rides"
+                });
+            }
+        }
         else if (data.type == "FIX_RIDES") {
             context.executeAction("cheatset", {
-                type: 31,
+                type: cheatTypes.FixRides,
                 param1: 0,
                 param2: 0
             }, (result) => {
@@ -681,7 +758,7 @@ function main() {
         }
         else if (data.type == "FIX_VANDALISM") {
             context.executeAction("cheatset", {
-                type: 26,
+                type: cheatTypes.FixVandalism,
                 param1: 0,
                 param2: 0
             }, (result) => {
@@ -697,7 +774,7 @@ function main() {
         }
         else if (data.type == "REMOVE_LITTER") {
             context.executeAction("cheatset", {
-                type: 27,
+                type: cheatTypes.RemoveLitter,
                 param1: 0,
                 param2: 0
             }, (result) => {
@@ -711,9 +788,25 @@ function main() {
                 });
             }
         }
+        else if (data.type == "WATER_PLANTS") {
+            context.executeAction("cheatset", {
+                type: cheatTypes.WaterPlants,
+                param1: 0,
+                param2: 0
+            }, (result) => {
+
+            });
+
+            if (enabledNotifications) {
+                park.postMessage({
+                    type: "blank",
+                    text: data.username + ": Watered all the plants"
+                });
+            }
+        }
         else if (data.type == "FORCE_WEATHER") {
             context.executeAction("cheatset", {
-                type: 35,
+                type: cheatTypes.ForceWeather,
                 param1: parseIntOrDefault(data.message, 0),
                 param2: 0
             }, (result) => {
@@ -741,6 +834,22 @@ function main() {
                 });
             }
         }
+        else if (data.type == "CLEAR_LOAN") {
+            context.executeAction("cheatset", {
+                type: cheatTypes.ClearLoan,
+                param1: 0,
+                param2: 0
+            }, (result) => {
+
+            });
+
+            if (enabledNotifications) {
+                park.postMessage({
+                    type: "blank",
+                    text: data.username + ": Paid off your loan"
+                });
+            }
+        }
         else if (data.type == "ADD_MONEY" || data.type == "REMOVE_MONEY") {
             let value = parseIntOrDefault(data.message, 1000);
             if ((value > 0 && data.type == "ADD_MONEY") ||
@@ -748,7 +857,7 @@ function main() {
                 if (value < 0)
                     value = -value;
                 context.executeAction("cheatset", {
-                    type: 16,
+                    type: cheatTypes.AddMoney,
                     param1: value * 10,
                     param2: 0
                 }, (result) => {
@@ -767,7 +876,7 @@ function main() {
                 if (value > 0)
                     value = -value;
                 context.executeAction("cheatset", {
-                    type: 16,
+                    type: cheatTypes.AddMoney,
                     param1: value * 10,
                     param2: 0
                 }, (result) => {
